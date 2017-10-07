@@ -7,37 +7,39 @@ import bodyParser from 'body-parser';
 import session from 'express-session';
 import passport from 'passport';
 //import all modules
-module.exports = function() {
-const app = express(); //เอาexpressมาใช้งาน
-
-if (process.env.NODE_ENV === "development") {
-app.use(morgan('dev'));
-}
-else {
-app.use(compression());
-}
-
-app.use(bodyParser.json()); //อ่านตัวบอดี้
-app.use(bodyParser.urlencoded({
-       extended: true
-}));
 module.exports = function () {
-    
-       var config = require('./config');
-       app.use(session({
-              secret: config.sessionSecret,
-              resave: false,
-              saveUninitializeed: true
-       }));
-       app.use(passport.initialize()); // start passport
-       app.use(passport.session()); // use session via express-session
+    const app = express(); //เอาexpressมาใช้งาน
 
-       require('../app/routes/index.route')(app);
-    
-}
+    if (process.env.NODE_ENV === "development") {
+        app.use(morgan('dev'));
+    }
+    else {
+        app.use(compression());
+    }
 
-require('../app/routes/index.route')(app); //import ตัวจัดการrouting ต้องอยู่หลัง app.use ทั้งหมด
-require('../app/routes/user.route')(app);
+    app.use(bodyParser.json()); //อ่านตัวบอดี้
+    app.use(bodyParser.urlencoded({
+        extended: true
+    }));
 
-return app;
-}
+    var config = require('./config');
+    app.use(session({
+        secret: config.sessionSecret,
+        resave: false,
+        saveUninitializeed: true
+    }));
+    app.use(passport.initialize()); // start passport
+    app.use(passport.session()); // use session via express-session
+
+    var path = require("path");
+    app.set('views', path.join(__dirname + '/../app/views/home.html'));
+    app.engine('html', require('ejs').renderFile);
+    app.set('view engine', 'ejs');
+
+
+
+    require('../app/routes/index.route')(app); //import ตัวจัดการrouting ต้องอยู่หลัง app.use ทั้งหมด
+    require('../app/routes/user.route')(app);
+
+    return app;
+}  
